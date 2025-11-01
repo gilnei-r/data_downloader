@@ -27,9 +27,9 @@ def main():
     output_dir = config['output_directory']
     tickers_file = config['tickers_file']
 
-    # Convert date strings to datetime objects
-    start_date = start_date_str
-    end_date = end_date_str
+    # Convert date objects to datetime objects
+    start_date = datetime.combine(start_date_str, datetime.min.time())
+    end_date = datetime.combine(end_date_str, datetime.max.time())
 
     # Load tickers from CSV
     tickers_df = pd.read_csv(tickers_file)
