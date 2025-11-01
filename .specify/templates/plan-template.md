@@ -31,7 +31,13 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+*   **Data Fetching**: The application must fetch financial data from specified APIs.
+*   **Data Storage**: Downloaded data must be stored locally in a structured and easily accessible format. All data must be saved in .csv files, one file for each ticker.
+*   **Configuration**: API keys and other settings must be managed externally from the code (e.g., via environment variables).
+*   **Modular Design**: The code should be organized logically, with separate modules for each data source and for data storage.
+*   **Error Handling**: The application must gracefully handle common errors, such as API connection failures, invalid symbols, or rate limits.
+*   **Ticker Management**: The application shall use one .csv file for the list of tickers to download. In this file will be specified the data provider.
+*   **Data Format**: The .csv format for stocks data must be "Data, Open, Close, High, Low" and need to be adjusted for dividends, splits, etc. The data for other financial data must be saved in a specific format.
 
 ## Project Structure
 
