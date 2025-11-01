@@ -48,10 +48,19 @@ class DownloaderService:
             ticker = row['symbol']
             provider_name = row['provider']
 
-            provider = self.get_provider(provider_name, login=int(os.getenv('MT5_LOGIN')), password=os.getenv('MT5_PASSWORD'), server=os.getenv('MT5_SERVER'))
+            provider = self.get_provider(provider_name)
 
             if not provider.connect():
-                continue
+                # If connection fails, try with credentials from environment variables
+                login = os.getenv('MT5_LOGIN')
+                password = os.getenv('MT5_PASSWORD')
+                server = os.getenv('MT5_SERVER')
+                if login and password and server:
+                    provider = self.get_provider(provider_name, login=int(login), password=password, server=server)
+                    if not provider.connect():
+                        continue
+                else:
+                    continue
 
             data = provider.get_data(ticker, from_date, to_date)
             if data:

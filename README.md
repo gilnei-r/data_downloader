@@ -38,13 +38,17 @@ output_directory: data
 tickers_file: tickers.csv
 ```
 
-Additionally, MetaTrader 5 credentials are required and should be configured via a `.env` file in the root of the project.
+### MetaTrader 5 Connection
 
-1.  Create a `.env` file in the root of the project.
-2.  Add the following content to the `.env` file, replacing the values with your own credentials:
+The application connects to the MetaTrader 5 terminal in two ways:
 
-    ```
-    MT5_LOGIN=your_login
-    MT5_PASSWORD=your_password
-    MT5_SERVER=your_server
-    ```
+1.  **Without credentials:** If the MetaTrader 5 terminal is already running and logged in, the application will connect to it automatically.
+2.  **With credentials:** If the application cannot connect to a running terminal, it will try to log in using the credentials provided in a `.env` file.
+
+To use the credential-based login, create a `.env` file in the root of the project with the following content, replacing the values with your own credentials:
+
+```
+MT5_LOGIN=your_login
+MT5_PASSWORD=your_password
+MT5_SERVER=your_server
+```

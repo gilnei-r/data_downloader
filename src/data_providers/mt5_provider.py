@@ -6,25 +6,27 @@ from src.models.historical_data import HistoricalData
 from src.data_providers import BaseProvider
 
 class MT5Provider(BaseProvider):
-    """Metatrader5 data provider."""
-    def __init__(self, login, password, server):
+    """MetaTrader 5 provider."""
+
+    def __init__(self, login: int = None, password: str = None, server: str = None):
         """Initializes the MT5Provider.
 
         Args:
-            login: The Metatrader5 login.
-            password: The Metatrader5 password.
-            server: The Metatrader5 server.
+            login: The login account number.
+            password: The password.
+            server: The server name.
         """
         self.login = login
         self.password = password
         self.server = server
 
-    def connect(self):
-        """Connects to Metatrader5."""
-        if not mt5.initialize(login=self.login, password=self.password, server=self.server):
-            print(f"initialize() failed, error code = {mt5.last_error()}")
-            return False
-        return True
+    def connect(self) -> bool:
+        """Connects to MetaTrader 5."""
+        if self.login and self.password and self.server:
+            return mt5.initialize(
+                login=self.login, password=self.password, server=self.server
+            )
+        return mt5.initialize()
 
     def disconnect(self):
         """Disconnects from Metatrader5."""
