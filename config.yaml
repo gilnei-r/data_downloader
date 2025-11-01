@@ -1,0 +1,4 @@
+start_date: 2023-01-01
+end_date: 2023-01-02
+output_directory: data
+tickers_file: tickers.csv
