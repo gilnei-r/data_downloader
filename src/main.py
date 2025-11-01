@@ -28,8 +28,8 @@ def main():
     tickers_file = config['tickers_file']
 
     # Convert date strings to datetime objects
-    start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
-    end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+    start_date = start_date_str
+    end_date = end_date_str
 
     # Load tickers from CSV
     tickers_df = pd.read_csv(tickers_file)
