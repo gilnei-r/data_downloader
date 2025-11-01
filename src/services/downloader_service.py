@@ -65,7 +65,7 @@ class DownloaderService:
             data = provider.get_data(ticker, from_date, to_date)
             if data:
                 df = pd.DataFrame(data)
-                file_path = os.path.join(data_dir, f'{ticker}_{provider_name}.csv')
+                file_path = os.path.join(data_dir, f'{ticker}_mt5.csv')
                 df.to_csv(file_path, index=False)
                 print(f"Data for {ticker} saved to {file_path}")
 
