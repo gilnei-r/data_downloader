@@ -65,6 +65,7 @@ class DownloaderService:
             data = provider.get_data(ticker, from_date, to_date)
             if data:
                 df = pd.DataFrame(data)
+                df['date'] = df['date'].dt.date  # Extract only the date part
                 file_path = os.path.join(data_dir, f'{ticker}_mt5.csv')
                 df.to_csv(file_path, index=False)
                 print(f"Data for {ticker} saved to {file_path}")
