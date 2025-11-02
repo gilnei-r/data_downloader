@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, call
 import pandas as pd
 from datetime import datetime
 from src.data_providers.bcb_provider import BCBProvider
@@ -26,6 +26,20 @@ class TestBCBProvider(unittest.TestCase):
         self.assertListEqual(list(result_df.columns), ['Date', 'Value', 'cumulative_factor'])
         self.assertEqual(len(result_df), 3)
         self.assertAlmostEqual(result_df['cumulative_factor'].iloc[-1], 1.2)
+
+    @patch('src.data_providers.bcb_provider.sgs.get')
+    def test_get_data_chunking(self, mock_sgs_get):
+        # Arrange
+        provider = BCBProvider()
+        ticker = '123'
+        from_date = datetime(2020, 1, 1)
+        to_date = datetime(2023, 1, 1)
+
+        # Act
+        provider.get_data(ticker, from_date, to_date)
+
+        # Assert
+        self.assertGreater(mock_sgs_get.call_count, 1)
 
 if __name__ == '__main__':
     unittest.main()
