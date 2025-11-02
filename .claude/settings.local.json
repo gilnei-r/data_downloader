@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//d/**)",
+      "Bash(python src/main.py:*)",
+      "Bash(python -m src.main:*)",
+      "Bash(python:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
