@@ -2,10 +2,14 @@
 import os
 import pandas as pd
 from datetime import datetime
+import logging
 from src.data_providers.mt5_provider import MT5Provider
 from src.data_providers.metastock_provider import MetastockProvider
 from src.data_providers.yf_provider import YFProvider
+from src.data_providers.bcb_provider import BCBProvider
 from src.models.historical_data import HistoricalData
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class DownloaderService:
     """Service to download data from different providers."""
@@ -15,7 +19,8 @@ class DownloaderService:
             self.providers = {
                 'mt5': MT5Provider,
                 'metastock': MetastockProvider,
-                'YF': YFProvider
+                'YF': YFProvider,
+                'BCB': BCBProvider
             }
         else:
             self.providers = providers
@@ -39,9 +44,10 @@ class DownloaderService:
             provider_name = row['provider']
 
             if provider_name not in self.providers:
-                print(f"Provider {provider_name} not supported.")
+                logging.warning(f"Provider {provider_name} not supported.")
                 continue
 
+            logging.info(f"Downloading data for {ticker} using provider {provider_name}.")
             provider = self.providers[provider_name]()
 
             if provider_name == 'mt5':
@@ -53,13 +59,18 @@ class DownloaderService:
                     if login and password and server:
                         provider = self.providers[provider_name](login=int(login), password=password, server=server)
                         if not provider.connect():
+                            logging.error(f"Failed to connect to MT5 with credentials for {ticker}.")
                             continue
                     else:
+                        logging.error(f"Failed to connect to MT5 for {ticker}.")
                         continue
-
-            data = provider.get_data(ticker, from_date, to_date)
             
-            if data:
+            if provider_name == 'BCB':
+                data = provider.download_data(ticker)
+            else:
+                data = provider.get_data(ticker, from_date, to_date)
+            
+            if data is not None and ((isinstance(data, pd.DataFrame) and not data.empty) or (isinstance(data, list) and data)):
                 if isinstance(data, list) and all(isinstance(d, HistoricalData) for d in data):
                     df = pd.DataFrame([d.to_dict() for d in data])
                     if provider_name == 'mt5':
@@ -67,13 +78,15 @@ class DownloaderService:
                 elif isinstance(data, pd.DataFrame):
                     df = data
                 else:
-                    print(f"Unsupported data type returned from provider {provider_name}")
+                    logging.warning(f"Unsupported data type returned from provider {provider_name}")
                     continue
 
                 if not df.empty:
                     file_path = os.path.join(data_dir, f'{ticker}_{provider_name}.csv')
                     df.to_csv(file_path, index=False)
-                    print(f"Data for {ticker} saved to {file_path}")
+                    logging.info(f"Data for {ticker} saved to {file_path}")
+            else:
+                logging.warning(f"No data downloaded for {ticker}.")
 
             if hasattr(provider, 'disconnect'):
                 provider.disconnect()
