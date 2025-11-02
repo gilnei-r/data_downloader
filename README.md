@@ -76,3 +76,8 @@ AAPL,metastock
 
 - **Description**: Reads historical data from local Metastock data files.
 - **Configuration**: The `metastock_data_path` in `config.yaml` must point to the root directory of your Metastock data.
+
+### Yahoo Finance (YF)
+
+- **Description**: Downloads historical data from Yahoo Finance.
+- **Configuration**: No specific configuration is required.

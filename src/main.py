@@ -1,4 +1,3 @@
-"""Main module for the data downloader application."""
 import logging
 import os
 from datetime import datetime
@@ -8,11 +7,12 @@ import pandas as pd
 
 from src.data_providers.mt5_provider import MT5Provider
 from src.data_providers.metastock_provider import MetastockProvider
+from src.data_providers.yf_provider import YFProvider
 from src.services.downloader_service import DownloaderService
 
 load_dotenv()
 
-# Load configuration from config.yaml
+# Load configuration from config
 with open('config.yaml', 'r', encoding='utf-8') as file:
     config = yaml.safe_load(file)
 
@@ -38,7 +38,8 @@ def main():
     # Initialize DownloaderService with a factory for providers
     provider_factory = {
         'mt5': MT5Provider,
-        'metastock': MetastockProvider
+        'metastock': MetastockProvider,
+        'YF': YFProvider
     }
     downloader = DownloaderService(provider_factory)
 

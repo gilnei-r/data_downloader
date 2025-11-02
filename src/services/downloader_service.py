@@ -4,6 +4,7 @@ import pandas as pd
 from datetime import datetime
 from src.data_providers.mt5_provider import MT5Provider
 from src.data_providers.metastock_provider import MetastockProvider
+from src.data_providers.yf_provider import YFProvider
 from src.models.historical_data import HistoricalData
 
 class DownloaderService:
@@ -13,7 +14,8 @@ class DownloaderService:
         if providers is None:
             self.providers = {
                 'mt5': MT5Provider,
-                'metastock': MetastockProvider
+                'metastock': MetastockProvider,
+                'YF': YFProvider
             }
         else:
             self.providers = providers

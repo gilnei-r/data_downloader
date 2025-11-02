@@ -2,3 +2,4 @@ MetaTrader5
 pandas
 python-dotenv
 pyyaml
+yfinance
