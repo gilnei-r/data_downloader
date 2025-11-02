@@ -1,5 +1,6 @@
 """Module for the DownloaderService."""
 import os
+import re
 import pandas as pd
 from datetime import datetime
 import logging
@@ -64,12 +65,17 @@ class DownloaderService:
                     else:
                         logging.error(f"Failed to connect to MT5 for {ticker}.")
                         continue
-            
+
             if provider_name == 'BCB':
-                data = provider.download_data(ticker)
+                bcb_ticker = re.match(r'\d+', str(ticker))
+                if bcb_ticker:
+                    data = provider.get_data(bcb_ticker.group(0), from_date, to_date)
+                else:
+                    logging.warning(f"Invalid BCB ticker format for {ticker}. Skipping.")
+                    continue
             else:
                 data = provider.get_data(ticker, from_date, to_date)
-            
+
             if data is not None and ((isinstance(data, pd.DataFrame) and not data.empty) or (isinstance(data, list) and data)):
                 if isinstance(data, list) and all(isinstance(d, HistoricalData) for d in data):
                     df = pd.DataFrame([d.to_dict() for d in data])

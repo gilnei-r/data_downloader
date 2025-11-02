@@ -1,11 +1,12 @@
 from bcb import sgs
 import pandas as pd
+from datetime import datetime
 import logging
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class BCBProvider:
-    def download_data(self, ticker: str) -> pd.DataFrame:
+    def get_data(self, ticker: str, from_date: datetime, to_date: datetime) -> pd.DataFrame:
         """
         Downloads time series data from BCB for a given ticker.
 
@@ -17,7 +18,7 @@ class BCBProvider:
         """
         try:
             logging.info(f"Downloading data for ticker {ticker} from BCB.")
-            df = sgs.get({ticker: ticker}, start='1900-01-01')
+            df = sgs.get({ticker: ticker}, start=from_date.strftime('%Y-%m-%d'), end=to_date.strftime('%Y-%m-%d'))
             if df.empty:
                 logging.warning(f"No data found for ticker {ticker}")
                 return None
