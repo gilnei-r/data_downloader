@@ -3,6 +3,8 @@
 Auto-generated from all feature plans. Last updated: 2025-11-01
 
 ## Active Technologies
+- Python 3.11 + pandas, [NEEDS CLARIFICATION: Python library for reading Metastock files] (002-metastock-data-provider)
+- Local file system (002-metastock-data-provider)
 
 - Python 3.11 + `MetaTrader5`, `pandas` (001-metatrader5-downloader)
 
@@ -22,6 +24,7 @@ cd src; pytest; ruff check .
 Python 3.11: Follow standard conventions
 
 ## Recent Changes
+- 002-metastock-data-provider: Added Python 3.11 + pandas, [NEEDS CLARIFICATION: Python library for reading Metastock files]
 
 - 001-metatrader5-downloader: Added Python 3.11 + `MetaTrader5`, `pandas`
 

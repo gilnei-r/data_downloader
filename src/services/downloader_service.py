@@ -2,33 +2,21 @@
 import os
 import pandas as pd
 from datetime import datetime
-from typing import Dict, Type
-from src.data_providers import BaseProvider
+from src.data_providers.mt5_provider import MT5Provider
+from src.data_providers.metastock_provider import MetastockProvider
+from src.models.historical_data import HistoricalData
 
 class DownloaderService:
     """Service to download data from different providers."""
-    def __init__(self, provider_factory: Dict[str, Type[BaseProvider]]):
-        """Initializes the DownloaderService.
-
-        Args:
-            provider_factory: A dictionary mapping provider names to provider classes.
-        """
-        self.provider_factory = provider_factory
-        self.providers = {}
-
-    def get_provider(self, provider_name: str, **kwargs) -> BaseProvider:
-        """Gets a provider instance.
-
-        Args:
-            provider_name: The name of the provider.
-            **kwargs: Keyword arguments to pass to the provider constructor.
-
-        Returns:
-            A provider instance.
-        """
-        if provider_name not in self.providers:
-            self.providers[provider_name] = self.provider_factory[provider_name](**kwargs)
-        return self.providers[provider_name]
+    def __init__(self, providers=None):
+        """Initializes the DownloaderService."""
+        if providers is None:
+            self.providers = {
+                'mt5': MT5Provider,
+                'metastock': MetastockProvider
+            }
+        else:
+            self.providers = providers
 
     def download_data(
         self, tickers_df: pd.DataFrame, from_date: datetime, to_date: datetime, data_dir: str = 'data'
@@ -48,26 +36,40 @@ class DownloaderService:
             ticker = row['symbol']
             provider_name = row['provider']
 
-            provider = self.get_provider(provider_name)
+            if provider_name not in self.providers:
+                print(f"Provider {provider_name} not supported.")
+                continue
 
-            if not provider.connect():
-                # If connection fails, try with credentials from environment variables
-                login = os.getenv('MT5_LOGIN')
-                password = os.getenv('MT5_PASSWORD')
-                server = os.getenv('MT5_SERVER')
-                if login and password and server:
-                    provider = self.get_provider(provider_name, login=int(login), password=password, server=server)
-                    if not provider.connect():
+            provider = self.providers[provider_name]()
+
+            if provider_name == 'mt5':
+                if not provider.connect():
+                    # If connection fails, try with credentials from environment variables
+                    login = os.getenv('MT5_LOGIN')
+                    password = os.getenv('MT5_PASSWORD')
+                    server = os.getenv('MT5_SERVER')
+                    if login and password and server:
+                        provider = self.providers[provider_name](login=int(login), password=password, server=server)
+                        if not provider.connect():
+                            continue
+                    else:
                         continue
-                else:
-                    continue
 
             data = provider.get_data(ticker, from_date, to_date)
+            
             if data:
-                df = pd.DataFrame(data)
-                df['date'] = df['date'].dt.date  # Extract only the date part
-                file_path = os.path.join(data_dir, f'{ticker}_mt5.csv')
-                df.to_csv(file_path, index=False)
-                print(f"Data for {ticker} saved to {file_path}")
+                if isinstance(data, list) and all(isinstance(d, HistoricalData) for d in data):
+                    df = pd.DataFrame([d.to_dict() for d in data])
+                elif isinstance(data, pd.DataFrame):
+                    df = data
+                else:
+                    print(f"Unsupported data type returned from provider {provider_name}")
+                    continue
 
-            provider.disconnect()
+                if not df.empty:
+                    file_path = os.path.join(data_dir, f'{ticker}_{provider_name}.csv')
+                    df.to_csv(file_path, index=False)
+                    print(f"Data for {ticker} saved to {file_path}")
+
+            if hasattr(provider, 'disconnect'):
+                provider.disconnect()

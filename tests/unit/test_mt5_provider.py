@@ -8,8 +8,8 @@ class TestMT5Provider(unittest.TestCase):
     def test_get_data_success(self, mock_mt5):
         # Arrange
         mock_rates = [
-            {'time': 1672531200, 'open': 150.0, 'high': 152.0, 'low': 149.0, 'close': 151.0},
-            {'time': 1672617600, 'open': 151.0, 'high': 153.0, 'low': 150.0, 'close': 152.0},
+            {'time': 1672531200, 'open': 150.0, 'high': 152.0, 'low': 149.0, 'close': 151.0, 'tick_volume': 1000},
+            {'time': 1672617600, 'open': 151.0, 'high': 153.0, 'low': 150.0, 'close': 152.0, 'tick_volume': 1200},
         ]
         mock_mt5.copy_rates_range.return_value = mock_rates
 

@@ -57,6 +57,7 @@ class MT5Provider(BaseProvider):
                     high=rate['high'],
                     low=rate['low'],
                     close=rate['close'],
+                    volume=rate['tick_volume']
                 )
             )
         return data
