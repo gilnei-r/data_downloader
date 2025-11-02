@@ -24,6 +24,7 @@ class BCBProvider:
                 return None
             df = df.reset_index()
             df.rename(columns={'index': 'Date', ticker: 'Value'}, inplace=True)
+            df['cumulative_factor'] = (1 + df['Value'].pct_change()).cumprod().fillna(1)
             logging.info(f"Successfully downloaded data for ticker {ticker}.")
             return df
         except Exception as e:

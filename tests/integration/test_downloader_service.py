@@ -12,14 +12,14 @@ class TestDownloaderService(unittest.TestCase):
         # Assert
         self.assertIsInstance(downloader, DownloaderService)
 
-    @patch('src.data_providers.bcb_provider.BCBProvider.download_data')
-    def test_download_data_for_bcb_provider(self, mock_download_data):
+    @patch('src.data_providers.bcb_provider.BCBProvider.get_data')
+    def test_download_data_for_bcb_provider(self, mock_get_data):
         # Arrange
         mock_df = pd.DataFrame({
             'Date': pd.to_datetime(['2023-01-01', '2023-01-02', '2023-01-03']),
             'Value': [10, 20, 30]
         })
-        mock_download_data.return_value = mock_df
+        mock_get_data.return_value = mock_df
 
         tickers_data = {
             'symbol': ['123'],
