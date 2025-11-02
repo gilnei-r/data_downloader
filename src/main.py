@@ -8,6 +8,7 @@ import pandas as pd
 from src.data_providers.mt5_provider import MT5Provider
 from src.data_providers.metastock_provider import MetastockProvider
 from src.data_providers.yf_provider import YFProvider
+from src.data_providers.bcb_provider import BCBProvider
 from src.services.downloader_service import DownloaderService
 
 load_dotenv()
@@ -39,7 +40,8 @@ def main():
     provider_factory = {
         'mt5': MT5Provider,
         'metastock': MetastockProvider,
-        'YF': YFProvider
+        'YF': YFProvider,
+        'BCB': BCBProvider
     }
     downloader = DownloaderService(provider_factory)
 
