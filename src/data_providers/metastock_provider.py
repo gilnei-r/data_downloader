@@ -2,7 +2,7 @@ import pandas as pd
 import yaml
 import logging
 from datetime import datetime
-from metastock2pd import metastock_read
+from metastock2pd import metastock_read, metastock_read_master
 from src.models.historical_data import HistoricalData
 
 logging.basicConfig(level=logging.INFO)
@@ -14,6 +14,7 @@ class MetastockProvider:
             with open('config.yaml', 'r') as f:
                 config = yaml.safe_load(f)
                 self.data_path = config['metastock_data_path']
+            self.master_df = metastock_read_master(self.data_path)
             logging.info("MetastockProvider initialized successfully")
         except FileNotFoundError:
             logging.error("Config file not found")
@@ -25,7 +26,16 @@ class MetastockProvider:
     def get_data(self, ticker: str, from_date: datetime, to_date: datetime) -> list[HistoricalData]:
         logging.info(f"Getting historical data for {ticker}")
         try:
-            df = metastock_read(self.data_path, ticker)
+            # Find the file number for the ticker
+            ticker_info = self.master_df[self.master_df['symbol'] == ticker]
+            if ticker_info.empty:
+                raise Exception(f"Ticker {ticker} not found in Metastock data")
+            
+            file_path = ticker_info['filename'].iloc[0]
+            
+            df = metastock_read(file_path)
+            df = df.reset_index()
+            df = df.rename(columns={'index': 'date'})
             df = df[(df['date'] >= from_date) & (df['date'] <= to_date)]
             
             data = []

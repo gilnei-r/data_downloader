@@ -7,6 +7,7 @@ import yaml
 import pandas as pd
 
 from src.data_providers.mt5_provider import MT5Provider
+from src.data_providers.metastock_provider import MetastockProvider
 from src.services.downloader_service import DownloaderService
 
 load_dotenv()
@@ -34,8 +35,11 @@ def main():
     # Load tickers from CSV
     tickers_df = pd.read_csv(tickers_file)
 
-    # Initialize DownloaderService with a factory for MT5Provider
-    provider_factory = {'metatrader5': MT5Provider}
+    # Initialize DownloaderService with a factory for providers
+    provider_factory = {
+        'mt5': MT5Provider,
+        'metastock': MetastockProvider
+    }
     downloader = DownloaderService(provider_factory)
 
     # Download data

@@ -60,6 +60,8 @@ class DownloaderService:
             if data:
                 if isinstance(data, list) and all(isinstance(d, HistoricalData) for d in data):
                     df = pd.DataFrame([d.to_dict() for d in data])
+                    if provider_name == 'mt5':
+                        df['date'] = df['date'].dt.date
                 elif isinstance(data, pd.DataFrame):
                     df = data
                 else:
