@@ -1,5 +1,5 @@
-start_date: 2024-01-01
-end_date: 2024-01-31
+start_date: 2000-01-01
+end_date: 2025-10-31
 output_directory: data
 tickers_file: tickers.csv
 metastock_data_path: C:\QUOTEBR\BVSP\BVSP

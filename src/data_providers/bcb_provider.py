@@ -21,12 +21,14 @@ class BCBProvider:
             
             all_data = []
             current_date = from_date
+            chunk_num = 0
             while current_date <= to_date:
+                chunk_num += 1
                 chunk_end_date = current_date + pd.DateOffset(days=365)
                 if chunk_end_date > to_date:
                     chunk_end_date = to_date
                 
-                df_chunk = sgs.get({ticker: ticker}, start=current_date.strftime('%Y-%m-%d'), end=chunk_end_date.strftime('%Y-%m-%d'))
+                df_chunk = sgs.get({ticker: int(ticker)}, start=current_date.strftime('%Y-%m-%d'), end=chunk_end_date.strftime('%Y-%m-%d'))
                 if not df_chunk.empty:
                     all_data.append(df_chunk)
                 
@@ -38,9 +40,12 @@ class BCBProvider:
 
             df = pd.concat(all_data)
             df = df.reset_index()
-            df.rename(columns={'index': 'Date', ticker: 'Value'}, inplace=True)
+            # Remove duplicates that can occur at chunk boundaries (e.g., monthly data on Jan 1)
+            df = df.drop_duplicates(subset=['Date'], keep='first')
+            # The Date column already exists from reset_index(), ticker column needs to be renamed to Value
+            df.rename(columns={ticker: 'Value'}, inplace=True)
             df['cumulative_factor'] = (1 + df['Value'] / 100).cumprod()
-            logging.info(f"Successfully downloaded data for ticker {ticker}.")
+            logging.info(f"Successfully downloaded {len(df)} records for ticker {ticker}.")
             return df
         except Exception as e:
             logging.error(f"Error downloading data for ticker {ticker}: {e}")
