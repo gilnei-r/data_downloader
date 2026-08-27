@@ -3,3 +3,5 @@ pandas
 python-dotenv
 pyyaml
 yfinance
+python-bcb
+metastock2pd

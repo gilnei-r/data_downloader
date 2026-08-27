@@ -15,7 +15,6 @@ This project is a Python application for downloading historical financial data f
 3.  Install the dependencies:
     ```bash
     pip install -r requirements.txt
-    pip install metastock2pd  # For Metastock data provider
     ```
 
 ## Usage
@@ -57,7 +56,7 @@ MT5_SERVER=your_server
 
 ## Data Providers
 
-The `tickers.csv` file specifies which data provider to use for each ticker. The `provider` column in `tickers.csv` should contain the name of the desired provider.
+The `tickers.csv` file specifies which data provider to use for each ticker. The `provider` column in `tickers.csv` should contain the name of the desired provider. The file may use either a comma (`,`) or a semicolon (`;`) as the delimiter — it is detected automatically.
 
 **`tickers.csv` example:**
 
@@ -65,7 +64,25 @@ The `tickers.csv` file specifies which data provider to use for each ticker. The
 symbol,provider
 PETR4,mt5
 AAPL,metastock
+BBDC4.SA,YF
+12-CDI,BCB
 ```
+
+## Output Data
+
+The downloaded data is saved as CSV files inside the directory configured by `output_directory` in `config.yaml` (default: `data`). The directory is created automatically if it does not exist.
+
+Each ticker produces **one CSV file per ticker**, named using the **base ticker name** (the exchange suffix and provider suffix are removed):
+
+- `BBDC4.SA` (Yahoo) → `data/BBDC4.csv`
+- `PETR4` (MetaTrader 5) → `data/PETR4.csv`
+- `12-CDI` (BCB) → `data/12-CDI.csv`
+
+> **Note:** because the file name is the bare ticker name (without provider suffix), two different providers downloading the same ticker would write to the same file. If a file already exists, it is overwritten with the newly downloaded data.
+
+## Error Handling
+
+If a download fails for a **single ticker** (e.g. the ticker is not found in the Metastock database, a network error, an invalid symbol, etc.), the application **logs an error and continues processing the next ticker** — it does not abort the whole run.
 
 ### MetaTrader 5 (mt5)
 

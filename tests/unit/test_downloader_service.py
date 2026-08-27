@@ -40,5 +40,40 @@ class TestDownloaderService(unittest.TestCase):
         tickers_df = pd.DataFrame({'symbol': ['TICKER'], 'provider': ['mt5']})
         self.downloader.download_data(tickers_df, datetime(2023, 1, 1), datetime(2023, 1, 2), self.test_data_dir)
         
-        expected_file_path = os.path.join(self.test_data_dir, 'TICKER_mt5.csv')
+        expected_file_path = os.path.join(self.test_data_dir, 'TICKER.csv')
+        self.assertTrue(os.path.exists(expected_file_path))
+
+    def test_download_data_continues_when_provider_raises_exception(self):
+        """Test that download_data logs the error and continues to the next ticker when a provider raises an exception."""
+        self.mock_provider.connect.return_value = True
+        # First ticker raises an exception (e.g. ticker not found in Metastock),
+        # second ticker returns valid data.
+        self.mock_provider.get_data.side_effect = [
+            Exception("Ticker NOTFOUND not found in Metastock data"),
+            [HistoricalData(datetime(2023, 1, 1), 1, 2, 0, 1.5, 1000)]
+        ]
+
+        tickers_df = pd.DataFrame({'symbol': ['BADTICKER', 'GOODTICKER'], 'provider': ['mt5', 'mt5']})
+        with self.assertLogs(level='ERROR') as logs:
+            self.downloader.download_data(
+                tickers_df, datetime(2023, 1, 1), datetime(2023, 1, 2), self.test_data_dir
+            )
+
+        # The failure must be logged and must not abort the whole loop.
+        self.assertTrue(any('BADTICKER' in message for message in logs.output))
+        # The second ticker must still have been processed and saved.
+        expected_file_path = os.path.join(self.test_data_dir, 'GOODTICKER.csv')
+        self.assertTrue(os.path.exists(expected_file_path))
+
+    def test_download_data_uses_base_ticker_name(self):
+        """Test that the saved file uses the base ticker name without exchange suffix."""
+        self.mock_provider.connect.return_value = True
+        self.mock_provider.get_data.return_value = [
+            HistoricalData(datetime(2023, 1, 1), 1, 2, 0, 1.5, 1000)
+        ]
+
+        tickers_df = pd.DataFrame({'symbol': ['BBDC4.SA'], 'provider': ['mt5']})
+        self.downloader.download_data(tickers_df, datetime(2023, 1, 1), datetime(2023, 1, 2), self.test_data_dir)
+
+        expected_file_path = os.path.join(self.test_data_dir, 'BBDC4.csv')
         self.assertTrue(os.path.exists(expected_file_path))

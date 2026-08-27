@@ -30,6 +30,8 @@ Python 3.11: Follow standard conventions
 - 004-bcb-downloader: Added Python 3.11 + pandas, python-bcb
 - 003-yahoo-finance-downloader: Added Python 3.11 + `pandas`, `yfinance`
 - 002-metastock-data-provider: Added Python 3.11 + pandas, `metastock2pd`. Fixed data download and saving for Metastock provider.
+- Downloader service: CSV output files now use the base ticker name (provider/exchange suffix removed) and a failure for a single ticker now logs the error and continues to the next ticker.
+- `main.py`: `tickers.csv` delimiter is auto-detected (supports both `,` and `;`).
 
 
 <!-- MANUAL ADDITIONS START -->

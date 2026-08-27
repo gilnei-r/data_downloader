@@ -29,7 +29,7 @@ class TestDownloaderService(unittest.TestCase):
 
         downloader = DownloaderService()
         data_dir = 'test_data'
-        expected_file_path = os.path.join(data_dir, '123_BCB.csv')
+        expected_file_path = os.path.join(data_dir, '123.csv')
 
         # Act
         downloader.download_data(tickers_df, None, None, data_dir=data_dir)
