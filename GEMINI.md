@@ -35,4 +35,5 @@ Python 3.11: Follow standard conventions
 
 
 <!-- MANUAL ADDITIONS START -->
+- CSV: `tickers.csv` (input) and all output `.csv` files now use the semicolon (`;`) as the delimiter.
 <!-- MANUAL ADDITIONS END -->

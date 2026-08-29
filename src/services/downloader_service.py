@@ -96,7 +96,7 @@ class DownloaderService:
 
                     if not df.empty:
                         file_path = os.path.join(data_dir, f'{_base_ticker_name(ticker)}.csv')
-                        df.to_csv(file_path, index=False)
+                        df.to_csv(file_path, index=False, sep=';')
                         logging.info(f"Data for {ticker} saved to {file_path}")
                 else:
                     logging.warning(f"No data downloaded for {ticker}.")

@@ -33,8 +33,8 @@ def main():
     start_date = datetime.combine(start_date_str, datetime.min.time())
     end_date = datetime.combine(end_date_str, datetime.max.time())
 
-    # Load tickers from CSV (auto-detect delimiter: supports both ',' and ';')
-    tickers_df = pd.read_csv(tickers_file, sep=None, engine='python')
+    # Load tickers from CSV (semicolon ';' delimiter)
+    tickers_df = pd.read_csv(tickers_file, sep=';')
 
     # Initialize DownloaderService with a factory for providers
     provider_factory = {

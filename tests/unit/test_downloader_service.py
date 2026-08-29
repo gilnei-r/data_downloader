@@ -77,3 +77,27 @@ class TestDownloaderService(unittest.TestCase):
 
         expected_file_path = os.path.join(self.test_data_dir, 'BBDC4.csv')
         self.assertTrue(os.path.exists(expected_file_path))
+
+    def test_download_data_saves_csv_with_semicolon_separator(self):
+        """Test that the output CSV file uses ';' as the column separator."""
+        self.mock_provider.connect.return_value = True
+        self.mock_provider.get_data.return_value = [
+            HistoricalData(datetime(2023, 1, 1), 1, 2, 0, 1.5, 1000)
+        ]
+
+        tickers_df = pd.DataFrame({'symbol': ['TICKER'], 'provider': ['mt5']})
+        self.downloader.download_data(tickers_df, datetime(2023, 1, 1), datetime(2023, 1, 2), self.test_data_dir)
+
+        expected_file_path = os.path.join(self.test_data_dir, 'TICKER.csv')
+        self.assertTrue(os.path.exists(expected_file_path))
+
+        # The file must be readable as a ';'-delimited CSV.
+        with open(expected_file_path, 'r') as f:
+            header = f.readline().strip()
+        self.assertEqual(header, 'date;open;high;low;close;volume')
+
+        df = pd.read_csv(expected_file_path, sep=';')
+        self.assertEqual(len(df), 1)
+        self.assertEqual(df['date'].iloc[0], '2023-01-01')
+        self.assertEqual(df['open'].iloc[0], 1)
+        self.assertEqual(df['close'].iloc[0], 1.5)
