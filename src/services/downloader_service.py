@@ -1,5 +1,6 @@
 """Module for the DownloaderService."""
 import os
+import csv
 import re
 import pandas as pd
 from datetime import datetime
@@ -31,6 +32,19 @@ class DownloaderService:
         else:
             self.providers = providers
 
+    @staticmethod
+    def _write_log_row(log_path, ticker, provider, status, message):
+        """Appends one row to the per-run CSV download log."""
+        is_new = not os.path.exists(log_path)
+        with open(log_path, 'a', encoding='utf-8', newline='') as f:
+            writer = csv.writer(f, delimiter=';')
+            if is_new:
+                writer.writerow(['timestamp', 'ticker', 'provider', 'status', 'message'])
+            writer.writerow([
+                datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                ticker, provider, status, message,
+            ])
+
     def download_data(
         self, tickers_df: pd.DataFrame, from_date: datetime, to_date: datetime, data_dir: str = 'data'
     ):
@@ -45,12 +59,15 @@ class DownloaderService:
         if not os.path.exists(data_dir):
             os.makedirs(data_dir)
 
+        log_path = os.path.join(data_dir, f"download_log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv")
+
         for _, row in tickers_df.iterrows():
             ticker = row['symbol']
             provider_name = row['provider']
 
             if provider_name not in self.providers:
                 logging.warning(f"Provider {provider_name} not supported.")
+                self._write_log_row(log_path, ticker, provider_name, 'failure', f'Provider {provider_name} not supported.')
                 continue
 
             provider = None
@@ -68,9 +85,11 @@ class DownloaderService:
                             provider = self.providers[provider_name](login=int(login), password=password, server=server)
                             if not provider.connect():
                                 logging.error(f"Failed to connect to MT5 with credentials for {ticker}.")
+                                self._write_log_row(log_path, ticker, provider_name, 'failure', 'Failed to connect to MT5 with credentials.')
                                 continue
                         else:
                             logging.error(f"Failed to connect to MT5 for {ticker}.")
+                            self._write_log_row(log_path, ticker, provider_name, 'failure', 'Failed to connect to MT5.')
                             continue
 
                 if provider_name == 'BCB':
@@ -79,6 +98,7 @@ class DownloaderService:
                         data = provider.get_data(bcb_ticker.group(0), from_date, to_date)
                     else:
                         logging.warning(f"Invalid BCB ticker format for {ticker}. Skipping.")
+                        self._write_log_row(log_path, ticker, provider_name, 'failure', 'Invalid BCB ticker format.')
                         continue
                 else:
                     data = provider.get_data(ticker, from_date, to_date)
@@ -92,16 +112,20 @@ class DownloaderService:
                         df = data
                     else:
                         logging.warning(f"Unsupported data type returned from provider {provider_name}")
+                        self._write_log_row(log_path, ticker, provider_name, 'failure', f'Unsupported data type returned from provider {provider_name}.')
                         continue
 
                     if not df.empty:
                         file_path = os.path.join(data_dir, f'{_base_ticker_name(ticker)}.csv')
                         df.to_csv(file_path, index=False, sep=';')
                         logging.info(f"Data for {ticker} saved to {file_path}")
+                        self._write_log_row(log_path, ticker, provider_name, 'success', f'Data saved to {file_path}')
                 else:
                     logging.warning(f"No data downloaded for {ticker}.")
+                    self._write_log_row(log_path, ticker, provider_name, 'failure', 'No data downloaded.')
             except Exception as e:
                 logging.error(f"Failed to download data for {ticker} using provider {provider_name}: {e}")
+                self._write_log_row(log_path, ticker, provider_name, 'failure', f'Failed to download data: {e}')
                 continue
             finally:
                 if hasattr(provider, 'disconnect'):

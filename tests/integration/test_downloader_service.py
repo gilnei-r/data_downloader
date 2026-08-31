@@ -1,5 +1,6 @@
 import unittest
 import os
+import shutil
 import pandas as pd
 from unittest.mock import patch
 from src.services.downloader_service import DownloaderService
@@ -38,8 +39,7 @@ class TestDownloaderService(unittest.TestCase):
         self.assertTrue(os.path.exists(expected_file_path))
 
         # Clean up
-        os.remove(expected_file_path)
-        os.rmdir(data_dir)
+        shutil.rmtree(data_dir, ignore_errors=True)
 
 if __name__ == '__main__':
     unittest.main()

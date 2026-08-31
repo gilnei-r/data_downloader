@@ -101,3 +101,30 @@ class TestDownloaderService(unittest.TestCase):
         self.assertEqual(df['date'].iloc[0], '2023-01-01')
         self.assertEqual(df['open'].iloc[0], 1)
         self.assertEqual(df['close'].iloc[0], 1.5)
+
+    def test_download_data_creates_csv_log_file(self):
+        """Test that a per-run CSV log file records download successes and failures."""
+        self.mock_provider.connect.return_value = True
+        self.mock_provider.get_data.return_value = [
+            HistoricalData(datetime(2023, 1, 1), 1, 2, 0, 1.5, 1000)
+        ]
+
+        tickers_df = pd.DataFrame({'symbol': ['TICKER'], 'provider': ['mt5']})
+        self.downloader.download_data(tickers_df, datetime(2023, 1, 1), datetime(2023, 1, 2), self.test_data_dir)
+
+
+
+        # Locate the per-run download log file created in the output directory.
+        log_files = [f for f in os.listdir(self.test_data_dir) if f.startswith('download_log_') and f.endswith('.csv')]
+        self.assertEqual(len(log_files), 1)
+
+
+        # Read the log file (separator ';') and validate header + a success row.
+        log_path = os.path.join(self.test_data_dir, log_files[0])
+        log_df = pd.read_csv(log_path, sep=';')
+        self.assertEqual(list(log_df.columns), ['timestamp', 'ticker', 'provider', 'status', 'message'])
+        self.assertEqual(len(log_df), 1)
+        self.assertEqual(log_df['ticker'].iloc[0], 'TICKER')
+        self.assertEqual(log_df['provider'].iloc[0], 'mt5')
+        self.assertEqual(log_df['status'].iloc[0], 'success')
+        self.assertIn('TICKER.csv', log_df['message'].iloc[0])

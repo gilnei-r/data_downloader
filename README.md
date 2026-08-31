@@ -72,6 +72,8 @@ BBDC4.SA;YF
 
 The downloaded data is saved as CSV files inside the directory configured by `output_directory` in `config.yaml` (default: `data`). The directory is created automatically if it does not exist. All output CSV files use the semicolon (`;`) as the column separator.
 
+Each run also produces a **download log file** named `download_log_<timestamp>.csv` (e.g. `download_log_20260831_153045.csv`) inside the same output directory, recording one row per ticker with the columns `timestamp;ticker;provider;status;message`. The `status` column is either `success` or `failure`, allowing you to track which downloads succeeded and which failed in each run.
+
 Each ticker produces **one CSV file per ticker**, named using the **base ticker name** (the exchange suffix and provider suffix are removed):
 
 - `BBDC4.SA` (Yahoo) → `data/BBDC4.csv`
